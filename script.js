@@ -1,5 +1,5 @@
 document.getElementById('sendRequest').addEventListener('click', async () => { // Find the button with id="sendRequest" and add a click event listener
-    const url = document.getElementById('apiUrl').ariaValueMax; //get the value entered into the input box with id="apiUrl"
+    const url = document.getElementById('apiUrl').value; //get the value entered into the input box with id="apiUrl"
     // Get a reference to the <pre> element where we will display the resonse
     const output = document.getElementById('responseOutput');
     try{
