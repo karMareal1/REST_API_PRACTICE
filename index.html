@@ -1,17 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>REST API TESTER</title>
-        <link rel="stylesheet" href="style.css">
-    </head>
-    <body>
-        <h1>Simple REST API Tester</h1>
-        <input id="apiUrl" type="text" placeholder="Enter the API URL here">
-        <button id="sendRequest">Send Request</button>
+<head>
+  <meta charset="utf-8" />
+  <title>Login with Google Demo</title>
+  <meta name="google-signin-client_id" content="79394913359-80smudkfnqh23jo8l7dgr6e82i4lpka7.apps.googleusercontent.com">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 40px; }
+    pre { background:#f4f4f4; padding:12px; border-radius:8px; }
+    #error { color: #b00020; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>Login with Google (Client Demo)</h1>
 
-        <pre id ="responseOutput"></pre>
+  <div id="g_id_signin"></div>
 
-        <script src="script.js"></script>
-    </body>
+  <h3>Decoded ID Token Payload</h3>
+  <pre id="output">Not signed in.</pre>
+  <div id="error"></div>
+
+  <script>
+    const out = document.getElementById('output');
+    const err = document.getElementById('error');
+
+    function base64UrlDecode(input) {
+      // Replace URL-safe chars, pad, then decode
+      input = input.replace(/-/g, '+').replace(/_/g, '/');
+      const pad = input.length % 4 ? 4 - (input.length % 4) : 0;
+      return atob(input + '='.repeat(pad));
+    }
+
+    function handleCredentialResponse(response) {
+      try {
+        const idToken = response?.credential;
+        if (!idToken) {
+          throw new Error('No credential returned. Check console and origins/cookies.');
+        }
+        const parts = idToken.split('.');
+        if (parts.length < 2) {
+          throw new Error('Malformed ID token.');
+        }
+        const payload = JSON.parse(base64UrlDecode(parts[1]));
+        out.textContent = JSON.stringify(payload, null, 2);
+        err.textContent = '';
+        console.log('Full ID token (for debugging only):', idToken);
+      } catch (e) {
+        err.textContent = 'Decode error: ' + e.message;
+        console.error(e);
+      }
+    }
+
+    window.onload = () => {
+      try {
+        google.accounts.id.initialize({
+          client_id: "79394913359-80smudkfnqh23jo8l7dgr6e82i4lpka7.apps.googleusercontent.com",
+          callback: handleCredentialResponse,
+          ux_mode: "popup",           // default
+          auto_select: false
+        });
+
+        google.accounts.id.renderButton(
+          document.getElementById("g_id_signin"),
+          { theme: "outline", size: "large", type: "standard", text: "signin_with" }
+        );
+
+        // Optional: show One Tap if you want
+        // google.accounts.id.prompt();
+      } catch (e) {
+        err.textContent = 'Initialization error: ' + e.message;
+        console.error(e);
+      }
+    };
+  </script>
+</body>
 </html>
